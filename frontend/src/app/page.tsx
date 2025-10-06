@@ -8,7 +8,7 @@ export default async function HomePage() {
   try {
     // We fetch data directly from our Express API endpoint.
     // The `cache: 'no-store'` option ensures we get fresh data on every request.
-    const res = await fetch('http://localhost:5001/api/health', { cache: 'no-store' });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/health`, { cache: 'no-store' });
 
     if (!res.ok) {
       throw new Error(`HTTP error! status: ${res.status}`);
