@@ -1,0 +1,113 @@
+# container for backend and database and frontend
+
+services:
+  # This is your new backend service
+  backend:
+    # This tells Docker Compose to build an image from a Dockerfile.
+    build:
+      # Use the './backend' directory as the build context.
+      context: ./backend
+      # Look for a file named 'Dockerfile' inside that context.
+      dockerfile: Dockerfile
+    
+    # This maps port 5001 on your host machine to port 5001 inside the container,
+    # so you can access your API from your browser at http://localhost:5001.
+    ports:
+      - "5000:5000"
+      
+    # This sets the environment variables for the backend container.
+    # THIS IS THE MOST IMPORTANT PART FOR DB CONNECTION!
+    environment:
+      # We are overriding the DATABASE_URL. Notice we use 'db' as the host,
+      # which is the service name of our postgres container.
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/postgres"
+      PORT: 5000
+
+    # This mounts your local backend code into the container for live-reloading.
+    volumes:
+      - ./backend:/app
+      # This is an important trick: it prevents your local node_modules from
+      # overwriting the node_modules installed inside the container.
+      - /app/node_modules
+      
+    # This tells Docker Compose to start the 'db' service BEFORE starting
+    # the 'backend' service. This prevents your app from crashing if the DB isn't ready.
+    depends_on:
+      - db
+
+  # This is your existing database service
+  db:
+    container_name: db
+    image: postgres:latest
+    restart: always
+    shm_size: 128mb
+    
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      
+    ports:
+      - '5432:5432'
+      
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# the backend does not have a container of its own here
+
+# services:
+
+#   db:
+#     container_name: db
+#     image: postgres:latest
+#     restart: always
+#     shm_size: 128mb 
+
+
+#     environment:
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: postgres
+#       POSTGRES_DB: postgres
+
+#     # This maps the port inside the container (5432) to your local machine (5432)
+#     # so your Prisma client can connect to it via localhost.
+#     ports:
+#       - '5432:5432'
+
+#     # This creates a 'volume' to persist the database data on your host machine.
+#     # Without this, you would lose all your data every time you restart the container.
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+
+# # This defines the named volume we referenced above
+# volumes:
+#   postgres_data:
+
+
+

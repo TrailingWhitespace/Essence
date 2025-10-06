@@ -20,6 +20,7 @@
           postgresql
           docker
           docker-compose
+          docker-buildx
         ];
 
         shellHook = ''
