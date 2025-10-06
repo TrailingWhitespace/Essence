@@ -29,6 +29,17 @@
         export PRISMA_QUERY_ENGINE_BINARY="${pkgs.prisma-engines}/bin/query-engine"
         export PRISMA_QUERY_ENGINE_LIBRARY="${pkgs.prisma-engines}/lib/libquery_engine.node"
         export PRISMA_FMT_BINARY="${pkgs.prisma-engines}/bin/prisma-fmt"
+
+        # Create the Docker CLI plugin directory if it doesn't exist
+          mkdir -p ~/.docker/cli-plugins
+          
+          # Symlink the buildx binary from the Nix store into the plugin directory.
+          # This is the key step that makes the 'docker' command aware of the buildx plugin.
+          ln -sf ${pkgs.docker-buildx}/bin/docker-buildx ~/.docker/cli-plugins/docker-buildx
+          
+          echo "✅ Docker buildx plugin has been linked for this shell session."
+       
+       
       '';
       };
     };

@@ -33,7 +33,7 @@ export default async function HomePage() {
         </p>
         <div className="mt-8 p-6 border border-gray-700 rounded-lg bg-gray-800 shadow-lg">
           <p className="text-lg">
-            <span className="font-semibold text-cyan-400">Backend Message:</span> "{apiMessage}"
+            <span className="font-semibold text-cyan-400">Backend Message:</span> {apiMessage}
           </p>
           <p className="text-lg mt-2">
             <span className="font-semibold text-cyan-400">Backend Status:</span>{' '}

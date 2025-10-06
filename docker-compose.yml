@@ -1,8 +1,27 @@
 # container for backend and database and frontend
 
 services:
+
+  frontend:
+    container_name: frontend
+    image: essence-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      # This tells the Next.js server (running inside the container)
+      # to find the backend API at the 'backend' service hostname.
+      NEXT_PUBLIC_API_BASE_URL: "http://localhost:5000"
+    depends_on:
+      - backend
+
+
   # This is your new backend service
   backend:
+    container_name: backend
+    image: essence-backend
     # This tells Docker Compose to build an image from a Dockerfile.
     build:
       # Use the './backend' directory as the build context.
