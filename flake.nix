@@ -1,5 +1,5 @@
 {
-  description = "A development shell for my personal organisation app";
+  description = "A development shell because nix is quirky";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
