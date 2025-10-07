@@ -2,7 +2,8 @@
 
 # --- Stage 1: Base Image ---
 # Start from the official, reliable Node.js 20 slim image
-FROM node:20-slim AS base
+FROM node:slim AS base
+RUN apt-get update && apt-get install -y openssl 
 WORKDIR /app
 
 # --- Stage 2: Install Dependencies ---

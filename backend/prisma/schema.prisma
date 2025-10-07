@@ -8,7 +8,7 @@ generator client {
   provider = "prisma-client-js"
   // output   = "../generated/prisma"
   // commenting out so that it uses node_modules/@prisma/client for the output
-
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -16,9 +16,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Note {
+model Todo {
   id        Int      @id @default(autoincrement())
-  title     String
-  content   String?  // The '?' makes this field optional
+  content     String
+  completed Boolean  @default(false)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

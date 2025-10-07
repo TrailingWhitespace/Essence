@@ -13,7 +13,7 @@ services:
     environment:
       # This tells the Next.js server (running inside the container)
       # to find the backend API at the 'backend' service hostname.
-      NEXT_PUBLIC_API_BASE_URL: "http://localhost:5000"
+      NEXT_PUBLIC_API_BASE_URL: "http://backend:5000"
     depends_on:
       - backend
 
@@ -33,6 +33,7 @@ services:
     # so you can access your API from your browser at http://localhost:5001.
     ports:
       - "5000:5000"
+      - "5555:5555"  # for prisma studio
       
     # This sets the environment variables for the backend container.
     # THIS IS THE MOST IMPORTANT PART FOR DB CONNECTION!
@@ -41,6 +42,7 @@ services:
       # which is the service name of our postgres container.
       DATABASE_URL: "postgresql://postgres:postgres@db:5432/postgres"
       PORT: 5000
+    command: npm run dev
 
     # This mounts your local backend code into the container for live-reloading.
     volumes:
