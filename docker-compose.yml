@@ -29,18 +29,23 @@ services:
     environment:
       NEXT_PUBLIC_API_BASE_URL: "http://backend:5000"
       CHOKIDAR_USEPOLLING: "true"
+      CI: "true" # pnpm install works without needing user input like yes i think
+      # this might be redundant now that im not installing pnpm every time the container
+      # restarts because frontend_node_modules volume already persists the node_modules
+      # from my local machine
     depends_on:
       - backend
     volumes:
       - ./frontend:/app:cached
       - frontend_node_modules:/app/node_modules
       - /app/.next
-    command: sh -c "pnpm install --frozen-lockfile && pnpm dev"
+    command: pnpm dev
+    # command: sh -c "pnpm install --frozen-lockfile && pnpm dev"
 
 
 
 
-  # This is your new backend service
+
   backend:
     container_name: backend
     image: essence-backend
@@ -78,8 +83,11 @@ services:
     depends_on:
       - db
     command: npm run dev
+    # this works now because prisma client is already generated at build time in Dockerfile
+    #command: sh -c "npx prisma generate && npm run dev"
+    # just running npm run dev gives error that prisma client not found
 
-  # This is your existing database service
+
   db:
     container_name: db
     image: postgres:latest

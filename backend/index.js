@@ -2,8 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
 
-import { PrismaClient } from '@prisma/client';
+// import { PrismaClient } from '@prisma/client'; doesnt work on node 24
 
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
 
 // Initialize the Express app
 const app = express();
@@ -15,7 +17,7 @@ const prisma = new PrismaClient();
 
 // --- Middlewares ---
 // Enable CORS (Cross-Origin Resource Sharing) to allow your frontend
-// (on localhost:3000) to make requests to your backend (on localhost:5001).
+// (on localhost:3000) to make requests to your backend (on localhost:5000).
 app.use(cors());
 
 // Enable the express.json middleware to parse JSON request bodies
