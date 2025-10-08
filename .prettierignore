@@ -1,0 +1,17 @@
+# Node modules
+node_modules
+**/node_modules
+.pnpm-store
+.pnpm
+
+# Build output
+dist
+build
+.next
+
+# Environment files
+.env
+.env.local
+
+# Logs
+*.log

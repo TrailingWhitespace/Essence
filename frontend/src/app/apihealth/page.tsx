@@ -2,13 +2,15 @@ import React from 'react';
 
 // This is an async Server Component
 export default async function ApiHealth() {
-  let apiMessage = "Loading message from backend...";
-  let apiStatus = "pending";
+  let apiMessage = 'Loading message from backend...';
+  let apiStatus = 'pending';
 
   try {
     // We fetch data directly from our Express API endpoint.
     // The `cache: 'no-store'` option ensures we get fresh data on every request.
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/health`, { cache: 'no-store' });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/health`, {
+      cache: 'no-store',
+    });
 
     if (!res.ok) {
       throw new Error(`HTTP error! status: ${res.status}`);
@@ -17,11 +19,10 @@ export default async function ApiHealth() {
     const data = await res.json();
     apiMessage = data.message;
     apiStatus = data.status;
-
   } catch (error) {
-    console.error("Failed to fetch from API:", error);
-    apiMessage = "Failed to load message from backend.";
-    apiStatus = "error";
+    console.error('Failed to fetch from API:', error);
+    apiMessage = 'Failed to load message from backend.';
+    apiStatus = 'error';
   }
 
   return (

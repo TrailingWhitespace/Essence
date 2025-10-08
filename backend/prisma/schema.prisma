@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   // output   = "../generated/prisma"
   // commenting out so that it uses node_modules/@prisma/client for the output
   binaryTargets = ["native", "debian-openssl-3.0.x"]
@@ -18,7 +18,7 @@ datasource db {
 
 model Todo {
   id        Int      @id @default(autoincrement())
-  content     String
+  content   String
   completed Boolean  @default(false)
   createdAt DateTime @default(now())
   // updatedAt DateTime @updatedAt

@@ -1,7 +1,6 @@
 # container for backend and database and frontend
 
 services:
-
   # frontend:
   #   container_name: frontend
   #   image: essence-frontend
@@ -25,11 +24,11 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.dev
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
-      NEXT_PUBLIC_API_BASE_URL: "http://backend:5000"
-      CHOKIDAR_USEPOLLING: "true"
-      CI: "true" # pnpm install works without needing user input like yes i think
+      NEXT_PUBLIC_API_BASE_URL: 'http://backend:5000'
+      CHOKIDAR_USEPOLLING: 'true'
+      CI: 'true' # pnpm install works without needing user input like yes i think
       # this might be redundant now that im not installing pnpm every time the container
       # restarts because frontend_node_modules volume already persists the node_modules
       # from my local machine
@@ -42,10 +41,6 @@ services:
     command: pnpm dev
     # command: sh -c "pnpm install --frozen-lockfile && pnpm dev"
 
-
-
-
-
   backend:
     container_name: backend
     image: essence-backend
@@ -55,21 +50,20 @@ services:
       context: ./backend
       # Look for a file named 'Dockerfile' inside that context.
       dockerfile: Dockerfile
-    
+
     # This maps port 5001 on your host machine to port 5001 inside the container,
     # so you can access your API from your browser at http://localhost:5001.
     ports:
-      - "5000:5000"
-      - "5555:5555"  # for prisma studio
-      
+      - '5000:5000'
+      - '5555:5555' # for prisma studio
+
     # This sets the environment variables for the backend container.
     # THIS IS THE MOST IMPORTANT PART FOR DB CONNECTION!
     environment:
       # We are overriding the DATABASE_URL. Notice we use 'db' as the host,
       # which is the service name of our postgres container.
-      DATABASE_URL: "postgresql://postgres:postgres@db:5432/postgres"
+      DATABASE_URL: 'postgresql://postgres:postgres@db:5432/postgres'
       PORT: 5000
-    
 
     # This mounts your local backend code into the container for live-reloading.
     volumes:
@@ -77,7 +71,7 @@ services:
       # This is an important trick: it prevents your local node_modules from
       # overwriting the node_modules installed inside the container.
       - /app/node_modules
-      
+
     # This tells Docker Compose to start the 'db' service BEFORE starting
     # the 'backend' service. This prevents your app from crashing if the DB isn't ready.
     depends_on:
@@ -87,21 +81,20 @@ services:
     #command: sh -c "npx prisma generate && npm run dev"
     # just running npm run dev gives error that prisma client not found
 
-
   db:
     container_name: db
     image: postgres:latest
     restart: always
     shm_size: 128mb
-    
+
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
-      
+
     ports:
       - '5432:5432'
-      
+
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -110,7 +103,7 @@ services:
     image: dpage/pgadmin4
     restart: unless-stopped
     ports:
-      - "5050:80"  # host:container
+      - '5050:80' # host:container
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
@@ -123,30 +116,6 @@ volumes:
   postgres_data:
   pgadmin_data:
   frontend_node_modules:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # the backend does not have a container of its own here
 
 # services:
@@ -155,8 +124,7 @@ volumes:
 #     container_name: db
 #     image: postgres:latest
 #     restart: always
-#     shm_size: 128mb 
-
+#     shm_size: 128mb
 
 #     environment:
 #       POSTGRES_USER: postgres
@@ -176,6 +144,4 @@ volumes:
 # # This defines the named volume we referenced above
 # volumes:
 #   postgres_data:
-
-
 

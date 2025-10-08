@@ -1,6 +1,4 @@
-
 import React from 'react';
-
 
 type Todo = {
   id: number;
@@ -9,7 +7,7 @@ type Todo = {
   createdAt: string;
 };
 
-// TODO Move this to lib/ 
+// TODO Move this to lib/
 async function getTodos(): Promise<Todo[]> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -17,7 +15,7 @@ async function getTodos(): Promise<Todo[]> {
     if (!res.ok) throw new Error(`Failed to fetch`);
     return res.json();
   } catch (error) {
-    console.error("Fetch Error:", error);
+    console.error('Fetch Error:', error);
     return [];
   }
 }
