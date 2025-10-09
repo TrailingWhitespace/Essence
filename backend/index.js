@@ -1,3 +1,5 @@
+// TODO Split routes in files, ex: routes/todos.js
+
 import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
@@ -45,6 +47,40 @@ app.post('/api/todos', async (req, res) => {
   } catch (error) {
     console.error('Failed to create todo:', error);
     res.status(500).json({ error: 'Unable to create todo.' });
+  }
+});
+
+app.put('/api/todos/:id/toggle', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const todo = await prisma.todo.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!todo) {
+      return res.status(404).json({ message: 'Todo not found' });
+    }
+
+    const updatedTodo = await prisma.todo.update({
+      where: { id: Number(id) },
+      data: { completed: !todo.completed },
+    });
+
+    res.status(200).json(updatedTodo);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.delete('/api/todos/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await prisma.todo.delete({
+      where: { id: Number(id) },
+    });
+    res.status(204).end();
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
