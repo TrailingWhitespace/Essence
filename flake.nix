@@ -21,6 +21,7 @@
           docker
           docker-compose
           docker-buildx
+          tailwindcss
         ];
 
         shellHook = ''
