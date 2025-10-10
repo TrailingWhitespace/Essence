@@ -37,7 +37,8 @@ services:
     volumes:
       - ./frontend:/app:cached
       - frontend_node_modules:/app/node_modules
-      - /app/.next
+      - frontend_next_cache:/app/.next
+
     command: npm run dev
     # command: sh -c "pnpm install --frozen-lockfile && pnpm dev"
 
@@ -116,6 +117,7 @@ volumes:
   postgres_data:
   pgadmin_data:
   frontend_node_modules:
+  frontend_next_cache:
 # the backend does not have a container of its own here
 
 # services:
