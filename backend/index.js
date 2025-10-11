@@ -86,10 +86,49 @@ app.delete('/api/todos/:id', async (req, res) => {
 
 app.get('/api/todos', async (req, res) => {
   try {
-    const todos = await prisma.todo.findMany();
+    const todos = await prisma.todo.findMany({ orderBy: { order: 'asc' } });
     res.status(200).json(todos);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+app.put('/api/todos/reorder', async (req, res) => {
+  try {
+    // 1. Get the array of todo IDs in their new order from the request body.
+    const { order } = req.body;
+
+    // 2. Basic validation: Make sure we received an array.
+    if (!Array.isArray(order)) {
+      return res.status(400).json({ error: 'Expected an array of IDs.' });
+    }
+
+    // 3. Use a Prisma transaction to update all todos in a single database operation.
+    // This is much more efficient than updating them one by one in a loop.
+    // It also ensures that if one update fails, they all fail, keeping your data consistent.
+    // const updatePromises = order.map((id, index) =>
+    //   prisma.todo.update({
+    //     where: { id: id },
+    //     data: { order: index }, // The index in the array becomes the new 'order' value.
+    //   })
+    // );
+
+    // // 4. Execute all the update operations.
+    // await prisma.$transaction(updatePromises);
+
+    for (const [index, id] of order.entries()) {
+      await prisma.todo.update({
+        where: { id: id },
+        data: { order: index },
+      });
+    }
+
+  
+    res.status(200).json({ message: 'Todo order updated successfully.' });
+
+  } catch (error) {
+    console.error("Failed to reorder todos:", error);
+    res.status(500).json({ error: 'Unable to reorder todos.' });
   }
 });
 

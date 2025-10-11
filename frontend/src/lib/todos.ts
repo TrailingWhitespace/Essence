@@ -54,3 +54,12 @@ export async function deleteTodo(id: number) {
     method: 'DELETE',
   });
 }
+
+export async function reorderTodos(idsInOrder: number[]) {
+  const API_URL = getBaseUrl();
+ await fetch(`${API_URL}/api/todos/reorder`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ order: idsInOrder }),
+  });
+}

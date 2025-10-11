@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import type { Todo } from '@/lib/todos';
-import { addTodo, deleteTodo, toggleTodo } from '@/lib/todos';
+import { addTodo, deleteTodo, reorderTodos, toggleTodo } from '@/lib/todos';
 import { DragOrderList } from '@/components/ui/TodoDragOrderList';
 import { AddTodoForm } from './AddTodoForm';
 
@@ -60,10 +60,16 @@ export default function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
   }
 };
 
-  function handleReorder(reorderedTodos: Todo[]) {
-    console.log('List has been reordered.');
-    setTodos(reorderedTodos);
-  }
+  const handleReorder = async (reorderedTodos: Todo[]) => {
+  // Optimistically update the UI right away
+  setTodos(reorderedTodos);
+
+  // Create an array of just the IDs in the new order
+  const idsInOrder = reorderedTodos.map(todo => todo.id);
+
+  // Call the new API endpoint in the background
+ await reorderTodos(idsInOrder);
+};
 
   return (
 
