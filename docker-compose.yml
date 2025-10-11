@@ -14,8 +14,14 @@ services:
     ports:
       - '3000:3000'
     environment:
-      NEXT_PUBLIC_API_BASE_URL: 'http://backend:5000'
-      CHOKIDAR_USEPOLLING: 'true'
+      # For the BROWSER. Must be prefixed with NEXT_PUBLIC_.
+      # This is the URL accessible from your host machine.
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
+
+      # For the SERVER. Not exposed to the browser.
+      # This is the URL for container-to-container communication.
+      - API_URL_INTERNAL=http://backend:5000
+      - CHOKIDAR_USEPOLLING=true
     depends_on:
       - backend
     # NO 'command' override needed anymore! The Dockerfile's CMD is correct.

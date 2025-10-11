@@ -1,6 +1,6 @@
-'use client';
+// 'use client';
 
-import AnimatedList from '@/components/AnimatedList';
+
 
 // TODO get components, lib back and use the animated list to display todos 
 // also get anything else from the old frontend that might be useful
@@ -10,34 +10,17 @@ import AnimatedList from '@/components/AnimatedList';
 // is there no way to make this work without 'use client' in page
 // api health route
 
-const items = [
-  'Item 1',
-  'Item 2',
-  'Item 3',
-  'Item 4',
-  'Item 5',
-  'Item 6',
-  'Item 7',
-  'Item 8',
-  'Item 9',
-  'Item 10'
-];
-export default function Home() {
-  return (
-   <main>
-    <AnimatedList
 
-  items={items}
 
-  onItemSelect={(item, index) => console.log(item, index)}
+import React from 'react';
+import { getTodos } from '@/lib/todos';
+import TodoList from '@/components/todos/TodoList'; 
 
-  showGradients={true}
+export default async function Home() {
 
-  enableArrowNavigation={true}
 
-  displayScrollbar={true}
+  
+  const initialTodos = await getTodos(process.env.API_URL_INTERNAL!);
 
-/>
-   </main>
-  );
+  return (<main><TodoList initialTodos={initialTodos} /></main>);
 }
