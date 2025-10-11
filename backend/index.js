@@ -30,24 +30,43 @@ app.get('/api/health', (req, res) => {
 });
 
 app.post('/api/todos', async (req, res) => {
-  try {
-    const { content } = req.body;
+  // The new, "shift-and-insert" way
+try {
+  const { content } = req.body;
+  if (!content) {
+    return res.status(400).json({ error: 'Todo content is required' });
+  }
 
-    if (!content) {
-      return res.status(400).json({ error: 'Todo content is required' });
-    }
+  // We will run two database operations inside a single transaction
+  const [_, newTodo] = await prisma.$transaction([
+    // Operation 1: Update all existing todos.
+    // The 'increment: 1' command efficiently adds 1 to the 'order' of every row.
+    prisma.todo.updateMany({
+      data: {
+        order: {
+          increment: 1,
+        },
+      },
+    }),
 
-    const newTodo = await prisma.todo.create({
+    // Operation 2: Create the new todo.
+    // We explicitly set its order to 0, placing it at the top.
+    prisma.todo.create({
       data: {
         content: content,
+        order: 0,
       },
-    });
+    }),
+  ]);
 
-    res.status(201).json(newTodo);
-  } catch (error) {
-    console.error('Failed to create todo:', error);
-    res.status(500).json({ error: 'Unable to create todo.' });
-  }
+  // The transaction returns an array with the result of each operation.
+  // We only care about the second result (the newTodo), so we send that back.
+  res.status(201).json(newTodo);
+
+} catch (error) {
+  console.error("Failed to create todo:", error);
+  res.status(500).json({ error: 'Unable to create todo.' });
+}
 });
 
 app.put('/api/todos/:id/toggle', async (req, res) => {
