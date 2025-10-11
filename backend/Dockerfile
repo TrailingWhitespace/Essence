@@ -1,37 +1,23 @@
-# --- Stage 1: Base Image ---
-FROM node:slim AS base
-RUN apt-get update && apt-get install -y openssl
+
+
+FROM node:22-alpine
 WORKDIR /app
 
-# --- Stage 2: Install Dependencies ---
-FROM base as deps
+# Copy package manifests for caching
 COPY package.json pnpm-lock.yaml ./
+
+# The Prisma schema is needed for 'prisma generate' to work
+COPY prisma ./prisma/
+
+# Enable pnpm via corepack and install dependencies
 RUN corepack enable pnpm && pnpm install --frozen-lockfile
 
-# --- Stage 3: Builder ---
-FROM base as builder
-WORKDIR /app
+# CRITICAL STEP: Generate the Prisma Client during the build
+RUN pnpm exec prisma generate
 
-# Copy dependencies
-COPY --from=deps /app/node_modules ./node_modules
-
-# Copy application code AND prisma folder
-COPY . .
-COPY prisma ./prisma
-
-# Generate Prisma Client at build time
-RUN npx prisma generate
-
-# --- Stage 4: Production Runner ---
-FROM base AS runner
-WORKDIR /app
-
-# Copy only what’s needed
-COPY --from=builder /app/package.json /app/pnpm-lock.yaml ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/index.js ./
+# We don't COPY the source code here; the volume mount will provide it.
 
 EXPOSE 5000
 
-CMD ["node", "index.js"]
+# The default command is to start the dev server
+CMD ["pnpm", "run", "dev"]

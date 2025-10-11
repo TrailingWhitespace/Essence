@@ -1,6 +1,43 @@
-# container for backend and database and frontend
+# TODO rewrite dockerfiles, docker-compose, dockerignores, use nextjs dockerfile from vercel and make dev and prod versions for both
 
 services:
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev # Using our new dev file
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # Shield for node_modules
+      - /app/.next      # Shield for build cache
+    ports:
+      - '3000:3000'
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: 'http://backend:5000'
+      CHOKIDAR_USEPOLLING: 'true'
+    depends_on:
+      - backend
+    # NO 'command' override needed anymore! The Dockerfile's CMD is correct.
+
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile 
+    volumes:
+      - ./backend:/app
+      - /app/node_modules # Shield for node_modules
+    ports:
+      - '5000:5000'
+      - '5555:5555'
+    environment:
+      DATABASE_URL: 'postgresql://postgres:postgres@db:5432/postgres'
+      PORT: 5000
+    depends_on:
+      - db
+
+
   # frontend:
   #   container_name: frontend
   #   image: essence-frontend
@@ -18,69 +55,69 @@ services:
   #   # command: sh -c "corepack enable pnpm && pnpm install && pnpm run dev"
   #   # command: npm run dev
 
-  frontend:
-    container_name: frontend
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
-    ports:
-      - '3000:3000'
-    environment:
-      NEXT_PUBLIC_API_BASE_URL: 'http://backend:5000'
-      CHOKIDAR_USEPOLLING: 'true'
-      CI: 'true' # pnpm install works without needing user input like yes i think
-      # this might be redundant now that im not installing pnpm every time the container
-      # restarts because frontend_node_modules volume already persists the node_modules
-      # from my local machine
-    depends_on:
-      - backend
-    volumes:
-      - ./frontend:/app # :cached
-      - frontend_node_modules:/app/node_modules
-      - frontend_next_cache:/app/.next
+  # frontend:
+  #   container_name: frontend
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile.dev
+  #   ports:
+  #     - '3000:3000'
+  #   environment:
+  #     NEXT_PUBLIC_API_BASE_URL: 'http://backend:5000'
+  #     CHOKIDAR_USEPOLLING: 'true'
+  #     CI: 'true' # pnpm install works without needing user input like yes i think
+  #     # this might be redundant now that im not installing pnpm every time the container
+  #     # restarts because frontend_node_modules volume already persists the node_modules
+  #     # from my local machine
+  #   depends_on:
+  #     - backend
+  #   volumes:
+  #     - ./frontend:/app # :cached
+  #     - frontend_node_modules:/app/node_modules
+  #     - frontend_next_cache:/app/.next
 
-    command: pnpm run dev
-    # command: sh -c "pnpm install --frozen-lockfile && pnpm dev"
+  #   command: pnpm run dev
+  #   # command: sh -c "pnpm install --frozen-lockfile && pnpm dev"
 
-  backend:
-    container_name: backend
-    image: essence-backend
-    # This tells Docker Compose to build an image from a Dockerfile.
-    build:
-      # Use the './backend' directory as the build context.
-      context: ./backend
-      # Look for a file named 'Dockerfile' inside that context.
-      dockerfile: Dockerfile
+  # backend:
+  #   container_name: backend
+  #   image: essence-backend
+  #   # This tells Docker Compose to build an image from a Dockerfile.
+  #   build:
+  #     # Use the './backend' directory as the build context.
+  #     context: ./backend
+  #     # Look for a file named 'Dockerfile' inside that context.
+  #     dockerfile: Dockerfile
 
-    # This maps port 5001 on your host machine to port 5001 inside the container,
-    # so you can access your API from your browser at http://localhost:5001.
-    ports:
-      - '5000:5000'
-      - '5555:5555' # for prisma studio
+  #   # This maps port 5001 on your host machine to port 5001 inside the container,
+  #   # so you can access your API from your browser at http://localhost:5001.
+  #   ports:
+  #     - '5000:5000'
+  #     - '5555:5555' # for prisma studio
 
-    # This sets the environment variables for the backend container.
-    # THIS IS THE MOST IMPORTANT PART FOR DB CONNECTION!
-    environment:
-      # We are overriding the DATABASE_URL. Notice we use 'db' as the host,
-      # which is the service name of our postgres container.
-      DATABASE_URL: 'postgresql://postgres:postgres@db:5432/postgres'
-      PORT: 5000
+  #   # This sets the environment variables for the backend container.
+  #   # THIS IS THE MOST IMPORTANT PART FOR DB CONNECTION!
+  #   environment:
+  #     # We are overriding the DATABASE_URL. Notice we use 'db' as the host,
+  #     # which is the service name of our postgres container.
+  #     DATABASE_URL: 'postgresql://postgres:postgres@db:5432/postgres'
+  #     PORT: 5000
 
-    # This mounts your local backend code into the container for live-reloading.
-    volumes:
-      - ./backend:/app
-      # This is an important trick: it prevents your local node_modules from
-      # overwriting the node_modules installed inside the container.
-      - /app/node_modules
+  #   # This mounts your local backend code into the container for live-reloading.
+  #   volumes:
+  #     - ./backend:/app
+  #     # This is an important trick: it prevents your local node_modules from
+  #     # overwriting the node_modules installed inside the container.
+  #     - /app/node_modules
 
-    # This tells Docker Compose to start the 'db' service BEFORE starting
-    # the 'backend' service. This prevents your app from crashing if the DB isn't ready.
-    depends_on:
-      - db
-    command: npm run dev
-    # this works now because prisma client is already generated at build time in Dockerfile
-    #command: sh -c "npx prisma generate && npm run dev"
-    # just running npm run dev gives error that prisma client not found
+  #   # This tells Docker Compose to start the 'db' service BEFORE starting
+  #   # the 'backend' service. This prevents your app from crashing if the DB isn't ready.
+  #   depends_on:
+  #     - db
+  #   command: npm run dev
+  #   # this works now because prisma client is already generated at build time in Dockerfile
+  #   #command: sh -c "npx prisma generate && npm run dev"
+  #   # just running npm run dev gives error that prisma client not found
 
   db:
     container_name: db
