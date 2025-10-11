@@ -36,6 +36,7 @@ services:
       PORT: 5000
     depends_on:
       - db
+    command: sh -c "pnpx prisma migrate deploy && pnpm run dev"
 
 
   # frontend:
@@ -136,23 +137,23 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4
-    restart: unless-stopped
-    ports:
-      - '5050:80' # host:container
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    depends_on:
-      - db
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
+  # pgadmin:
+  #   container_name: pgadmin
+  #   image: dpage/pgadmin4
+  #   restart: unless-stopped
+  #   ports:
+  #     - '5050:80' # host:container
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@admin.com
+  #     PGADMIN_DEFAULT_PASSWORD: admin
+  #   depends_on:
+  #     - db
+  #   volumes:
+  #     - pgadmin_data:/var/lib/pgadmin
 
 volumes:
   postgres_data:
-  pgadmin_data:
+  # pgadmin_data:
   frontend_node_modules:
   frontend_next_cache:
 # the backend does not have a container of its own here
