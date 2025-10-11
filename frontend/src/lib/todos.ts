@@ -1,4 +1,3 @@
-
 export type Todo = {
   id: number;
   content: string;
@@ -7,15 +6,10 @@ export type Todo = {
 };
 
 function getBaseUrl(): string {
-
   const isServer = typeof window === 'undefined';
 
-  
-  const apiUrl = isServer
-    ? process.env.API_URL_INTERNAL
-    : process.env.NEXT_PUBLIC_API_BASE_URL; 
+  const apiUrl = isServer ? process.env.API_URL_INTERNAL : process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  // A robust check to ensure the variable is set, preventing runtime errors
   if (!apiUrl) {
     const varName = isServer ? 'API_URL_INTERNAL' : 'NEXT_PUBLIC_API_BASE_URL';
     throw new Error(`Environment variable ${varName} is not set.`);
@@ -24,10 +18,9 @@ function getBaseUrl(): string {
   return apiUrl;
 }
 
-
 export async function getTodos(): Promise<Todo[]> {
   try {
-    const API_URL = getBaseUrl(); 
+    const API_URL = getBaseUrl();
     const res = await fetch(`${API_URL}/api/todos`, { cache: 'no-store' });
     if (!res.ok) throw new Error(`Failed to fetch`);
     return res.json();
@@ -38,7 +31,7 @@ export async function getTodos(): Promise<Todo[]> {
 }
 
 export async function addTodo(content: string) {
-  const API_URL = getBaseUrl(); 
+  const API_URL = getBaseUrl();
   const res = await fetch(`${API_URL}/api/todos`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -48,7 +41,7 @@ export async function addTodo(content: string) {
 }
 
 export async function toggleTodo(id: number) {
-  const API_URL = getBaseUrl(); 
+  const API_URL = getBaseUrl();
   const res = await fetch(`${API_URL}/api/todos/${id}/toggle`, {
     method: 'PUT',
   });
