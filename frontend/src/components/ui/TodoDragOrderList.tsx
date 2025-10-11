@@ -61,7 +61,7 @@ function DragOrderItem({
       dragListener={false}
       dragControls={dragControls}
       className={`flex justify-between items-center p-4 rounded-xl border shadow-sm transition-colors ${
-        item.completed ? 'bg-gray-800/50 border-gray-800' : 'bg-gray-800 border-gray-700'
+        item.completed ? 'bg-gray-700 border-black' : 'bg-gray-800 border-white'
       }`}
     >
       <div className="flex items-center space-x-4 flex-1">
@@ -123,10 +123,10 @@ const inactiveShadow = '0px 0px 0px rgba(0,0,0,0.8)';
 function useRaisedShadow(value: MotionValue<number>) {
   const boxShadow = useMotionValue(inactiveShadow);
 
-  useMotionValueEvent(value, "change", (latest) => {
+  useMotionValueEvent(value, 'change', (latest) => {
     if (latest !== 0) {
       // If the item is being dragged, animate in the shadow.
-      animate(boxShadow, "5px 5px 15px rgba(0,0,0,0.15)");
+      animate(boxShadow, '5px 5px 15px rgba(0,0,0,0.15)');
     } else {
       // If the item is dropped, animate the shadow away.
       animate(boxShadow, inactiveShadow);

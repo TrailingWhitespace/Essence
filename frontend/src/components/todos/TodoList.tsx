@@ -11,7 +11,7 @@ export default function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
 
   const handleToggle = async (idToToggle: number) => {
     // Find the todo we're about to toggle to get its current status
-    const todoToToggle = todos.find(todo => todo.id === idToToggle);
+    const todoToToggle = todos.find((todo) => todo.id === idToToggle);
     if (!todoToToggle) return;
 
     try {
@@ -19,26 +19,26 @@ export default function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
       await toggleTodo(idToToggle);
 
       // 3. Then, update the UI state. This is an "optimistic update"
-      setTodos(currentTodos =>
-        currentTodos.map(todo =>
-          todo.id === idToToggle ? { ...todo, completed: !todo.completed } : todo
-        )
+      setTodos((currentTodos) =>
+        currentTodos.map((todo) =>
+          todo.id === idToToggle ? { ...todo, completed: !todo.completed } : todo,
+        ),
       );
     } catch (error) {
-      console.error("Failed to toggle todo:", error);
+      console.error('Failed to toggle todo:', error);
       // Optional: Add logic here to revert the UI change if the API call fails
     }
   };
 
- const handleDelete = async (idToDelete: number) => {
+  const handleDelete = async (idToDelete: number) => {
     try {
       // 1. Call the API first to delete it from the database
       await deleteTodo(idToDelete);
 
       // 2. Then, update the UI by filtering it out of the list
-      setTodos(currentTodos => currentTodos.filter(todo => todo.id !== idToDelete));
+      setTodos((currentTodos) => currentTodos.filter((todo) => todo.id !== idToDelete));
     } catch (error) {
-      console.error("Failed to delete todo:", error);
+      console.error('Failed to delete todo:', error);
       // Optional: Show an error message to the user
     }
   };
