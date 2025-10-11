@@ -3,11 +3,13 @@
 import React, { useEffect } from 'react';
 import {
   useMotionValue,
+  MotionValue,
   Reorder,
   useDragControls,
   motion,
   animate,
   DragControls,
+  useMotionValueEvent,
 } from 'framer-motion';
 import { GripVertical, Check, Trash } from 'lucide-react';
 import type { Todo } from '@/lib/todos';
@@ -118,30 +120,18 @@ function ReorderHandle({ dragControls }: { dragControls: DragControls }) {
 
 const inactiveShadow = '0px 0px 0px rgba(0,0,0,0.8)';
 
-function useRaisedShadow(value: ReturnType<typeof useMotionValue>) {
+function useRaisedShadow(value: MotionValue<number>) {
   const boxShadow = useMotionValue(inactiveShadow);
 
-  useEffect(() => {
-    let isActive = false;
-
-    value.onChange((latest) => {
-      const wasActive = isActive;
-
-      if (latest !== 0) {
-        isActive = true;
-
-        if (isActive !== wasActive) {
-          animate(boxShadow, '5px 5px 15px rgba(0,0,0,0.15)');
-        }
-      } else {
-        isActive = false;
-
-        if (isActive !== wasActive) {
-          animate(boxShadow, inactiveShadow);
-        }
-      }
-    });
-  }, [value]);
+  useMotionValueEvent(value, "change", (latest) => {
+    if (latest !== 0) {
+      // If the item is being dragged, animate in the shadow.
+      animate(boxShadow, "5px 5px 15px rgba(0,0,0,0.15)");
+    } else {
+      // If the item is dropped, animate the shadow away.
+      animate(boxShadow, inactiveShadow);
+    }
+  });
 
   return boxShadow;
 }

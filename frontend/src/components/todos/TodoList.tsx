@@ -2,27 +2,45 @@
 
 import React, { useState } from 'react';
 import type { Todo } from '@/lib/todos';
-import { DragOrderList } from '@/components/ui/DragOrderList';
+import { deleteTodo, toggleTodo } from '@/lib/todos';
+import { DragOrderList } from '@/components/ui/TodoDragOrderList';
 
 export default function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
   // This is now the SINGLE SOURCE OF TRUTH for our list.
   const [todos, setTodos] = useState(initialTodos);
 
-  // All our logic lives here. We will add API calls to these functions.
-  const handleToggle = (idToToggle: number) => {
-    // Here you would call your toggle API function
-    console.log(`Toggling todo with id: ${idToToggle}`);
-    setTodos((currentTodos) =>
-      currentTodos.map((todo) =>
-        todo.id === idToToggle ? { ...todo, completed: !todo.completed } : todo,
-      ),
-    );
+  const handleToggle = async (idToToggle: number) => {
+    // Find the todo we're about to toggle to get its current status
+    const todoToToggle = todos.find(todo => todo.id === idToToggle);
+    if (!todoToToggle) return;
+
+    try {
+      // 2. Call the API first
+      await toggleTodo(idToToggle);
+
+      // 3. Then, update the UI state. This is an "optimistic update"
+      setTodos(currentTodos =>
+        currentTodos.map(todo =>
+          todo.id === idToToggle ? { ...todo, completed: !todo.completed } : todo
+        )
+      );
+    } catch (error) {
+      console.error("Failed to toggle todo:", error);
+      // Optional: Add logic here to revert the UI change if the API call fails
+    }
   };
 
-  const handleDelete = (idToDelete: number) => {
-    // Here you would call your delete API function
-    console.log(`Deleting todo with id: ${idToDelete}`);
-    setTodos((currentTodos) => currentTodos.filter((todo) => todo.id !== idToDelete));
+ const handleDelete = async (idToDelete: number) => {
+    try {
+      // 1. Call the API first to delete it from the database
+      await deleteTodo(idToDelete);
+
+      // 2. Then, update the UI by filtering it out of the list
+      setTodos(currentTodos => currentTodos.filter(todo => todo.id !== idToDelete));
+    } catch (error) {
+      console.error("Failed to delete todo:", error);
+      // Optional: Show an error message to the user
+    }
   };
 
   function handleReorder(reorderedTodos: Todo[]) {
