@@ -19,8 +19,8 @@ import TodoList from '@/components/todos/TodoList';
 export default async function Home() {
 
 
-  
-  const initialTodos = await getTodos(process.env.API_URL_INTERNAL!);
+
+  const initialTodos = await getTodos();
 
   return (<main><TodoList initialTodos={initialTodos} /></main>);
 }
