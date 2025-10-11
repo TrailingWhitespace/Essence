@@ -1,12 +1,11 @@
+import path from "path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   turbopack: {
-    // Treat the frontend folder as the root for Turbopack
-    root: __dirname,
+    // Always resolve to the directory where this file lives
+    root: path.resolve(__dirname),
   },
 };
 
 export default nextConfig;
-
-
