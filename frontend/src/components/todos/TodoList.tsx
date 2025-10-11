@@ -2,59 +2,83 @@
 
 import React, { useState } from 'react';
 import type { Todo } from '@/lib/todos';
-import { deleteTodo, toggleTodo } from '@/lib/todos';
+import { addTodo, deleteTodo, toggleTodo } from '@/lib/todos';
 import { DragOrderList } from '@/components/ui/TodoDragOrderList';
+import { AddTodoForm } from './AddTodoForm';
 
 export default function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
-  // This is now the SINGLE SOURCE OF TRUTH for our list.
+ 
   const [todos, setTodos] = useState(initialTodos);
 
-  const handleToggle = async (idToToggle: number) => {
-    // Find the todo we're about to toggle to get its current status
-    const todoToToggle = todos.find((todo) => todo.id === idToToggle);
-    if (!todoToToggle) return;
-
+   const handleAddTodo = async (content: string) => { // <-- 2. Create the handler function
     try {
-      // 2. Call the API first
-      await toggleTodo(idToToggle);
-
-      // 3. Then, update the UI state. This is an "optimistic update"
-      setTodos((currentTodos) =>
-        currentTodos.map((todo) =>
-          todo.id === idToToggle ? { ...todo, completed: !todo.completed } : todo,
-        ),
-      );
+      const newTodo = await addTodo(content); 
+      setTodos(currentTodos => [newTodo, ...currentTodos]); // Add to the top of the UI list
     } catch (error) {
-      console.error('Failed to toggle todo:', error);
-      // Optional: Add logic here to revert the UI change if the API call fails
+      console.error("Failed to add todo:", error);
     }
   };
+
+  const handleToggle = async (idToToggle: number) => {
+  const todoToToggle = todos.find((todo) => todo.id === idToToggle);
+  if (!todoToToggle) return;
+
+  const originalTodos = todos;
+
+  // 1. Optimistically update the UI immediately
+  setTodos((currentTodos) =>
+    currentTodos.map((todo) =>
+      todo.id === idToToggle ? { ...todo, completed: !todo.completed } : todo,
+    ),
+  );
+
+  try {
+  
+    await toggleTodo(idToToggle);
+  } catch (error) {
+    console.error('Failed to toggle todo:', error);
+ 
+    setTodos(originalTodos);
+  }
+};
 
   const handleDelete = async (idToDelete: number) => {
-    try {
-      // 1. Call the API first to delete it from the database
-      await deleteTodo(idToDelete);
+  // 1. Keep a copy of the original list in case we need to revert
+  const originalTodos = todos;
 
-      // 2. Then, update the UI by filtering it out of the list
-      setTodos((currentTodos) => currentTodos.filter((todo) => todo.id !== idToDelete));
-    } catch (error) {
-      console.error('Failed to delete todo:', error);
-      // Optional: Show an error message to the user
-    }
-  };
+
+  setTodos((currentTodos) => currentTodos.filter((todo) => todo.id !== idToDelete));
+
+  try {
+ 
+    await deleteTodo(idToDelete);
+  } catch (error) {
+    console.error('Failed to delete todo:', error);
+
+    setTodos(originalTodos);
+
+  }
+};
 
   function handleReorder(reorderedTodos: Todo[]) {
-    // Here you could call an API to save the new order
     console.log('List has been reordered.');
     setTodos(reorderedTodos);
   }
 
   return (
-    <DragOrderList
-      items={todos}
-      onReorder={handleReorder}
-      onToggle={handleToggle}
-      onDelete={handleDelete}
-    />
+
+    <div className="w-full max-w-2xl mx-auto">
+      
+      <div className="mb-8">
+        <AddTodoForm onAddTodo={handleAddTodo} />
+      </div>
+      
+      <DragOrderList
+        items={todos}
+        onReorder={handleReorder}
+        onToggle={handleToggle}
+        onDelete={handleDelete}
+      />
+    </div>
   );
 }
