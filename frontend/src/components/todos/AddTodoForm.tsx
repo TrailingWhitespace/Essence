@@ -1,35 +1,29 @@
+'use client';
 
-"use client";
-
-import { useState } from "react";
-import { Plus } from "lucide-react";
+import { useState } from 'react';
+import { Plus } from 'lucide-react';
 
 interface AddTodoFormProps {
   onAddTodo: (content: string) => void;
 }
 
 export function AddTodoForm({ onAddTodo }: AddTodoFormProps) {
-  
-  const [inputText, setInputText] = useState("");
+  const [inputText, setInputText] = useState('');
 
   const handleSubmit = (event: React.FormEvent) => {
     // Prevent the default browser action of reloading the page
     event.preventDefault();
 
-    // Don't add an empty todo
     if (inputText.trim().length === 0) {
       return;
     }
 
-    // Call the function passed down from the parent
     onAddTodo(inputText);
 
-    // Clear the input field for the next todo
-    setInputText("");
+    setInputText('');
   };
 
   return (
-    
     <form onSubmit={handleSubmit} className="flex items-center gap-2">
       <input
         type="text"

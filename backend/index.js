@@ -9,10 +9,8 @@ import 'dotenv/config';
 import pkg from '@prisma/client';
 const { PrismaClient } = pkg;
 
-// Initialize the Express app
 const app = express();
 
-// Define the port. Use an environment variable or default to 5001
 const PORT = process.env.PORT || 5001;
 
 const prisma = new PrismaClient();
@@ -30,43 +28,34 @@ app.get('/api/health', (req, res) => {
 });
 
 app.post('/api/todos', async (req, res) => {
-  // The new, "shift-and-insert" way
-try {
-  const { content } = req.body;
-  if (!content) {
-    return res.status(400).json({ error: 'Todo content is required' });
-  }
+  try {
+    const { content } = req.body;
+    if (!content) {
+      return res.status(400).json({ error: 'Todo content is required' });
+    }
 
-  // We will run two database operations inside a single transaction
-  const [_, newTodo] = await prisma.$transaction([
-    // Operation 1: Update all existing todos.
-    // The 'increment: 1' command efficiently adds 1 to the 'order' of every row.
-    prisma.todo.updateMany({
-      data: {
-        order: {
-          increment: 1,
+    const [_, newTodo] = await prisma.$transaction([
+      prisma.todo.updateMany({
+        data: {
+          order: {
+            increment: 1,
+          },
         },
-      },
-    }),
+      }),
 
-    // Operation 2: Create the new todo.
-    // We explicitly set its order to 0, placing it at the top.
-    prisma.todo.create({
-      data: {
-        content: content,
-        order: 0,
-      },
-    }),
-  ]);
+      prisma.todo.create({
+        data: {
+          content: content,
+          order: 0,
+        },
+      }),
+    ]);
 
-  // The transaction returns an array with the result of each operation.
-  // We only care about the second result (the newTodo), so we send that back.
-  res.status(201).json(newTodo);
-
-} catch (error) {
-  console.error("Failed to create todo:", error);
-  res.status(500).json({ error: 'Unable to create todo.' });
-}
+    res.status(201).json(newTodo);
+  } catch (error) {
+    console.error('Failed to create todo:', error);
+    res.status(500).json({ error: 'Unable to create todo.' });
+  }
 });
 
 app.put('/api/todos/:id/toggle', async (req, res) => {
@@ -114,26 +103,11 @@ app.get('/api/todos', async (req, res) => {
 
 app.put('/api/todos/reorder', async (req, res) => {
   try {
-    // 1. Get the array of todo IDs in their new order from the request body.
     const { order } = req.body;
 
-    // 2. Basic validation: Make sure we received an array.
     if (!Array.isArray(order)) {
       return res.status(400).json({ error: 'Expected an array of IDs.' });
     }
-
-    // 3. Use a Prisma transaction to update all todos in a single database operation.
-    // This is much more efficient than updating them one by one in a loop.
-    // It also ensures that if one update fails, they all fail, keeping your data consistent.
-    // const updatePromises = order.map((id, index) =>
-    //   prisma.todo.update({
-    //     where: { id: id },
-    //     data: { order: index }, // The index in the array becomes the new 'order' value.
-    //   })
-    // );
-
-    // // 4. Execute all the update operations.
-    // await prisma.$transaction(updatePromises);
 
     for (const [index, id] of order.entries()) {
       await prisma.todo.update({
@@ -142,16 +116,13 @@ app.put('/api/todos/reorder', async (req, res) => {
       });
     }
 
-  
     res.status(200).json({ message: 'Todo order updated successfully.' });
-
   } catch (error) {
-    console.error("Failed to reorder todos:", error);
+    console.error('Failed to reorder todos:', error);
     res.status(500).json({ error: 'Unable to reorder todos.' });
   }
 });
 
-// --- Server Startup ---
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });

@@ -14,18 +14,14 @@ import {
 import { GripVertical, Check, Trash } from 'lucide-react';
 import type { Todo } from '@/lib/todos';
 
-// --- The new, more powerful props interface ---
 interface DragOrderListProps {
-  items: Todo[]; // The list to display
-  onReorder: (items: Todo[]) => void; // A function to call when the list is reordered
-  onToggle: (id: number) => void; // A function to call when a checkbox is clicked
-  onDelete: (id: number) => void; // A function to call when the trash is clicked
+  items: Todo[];
+  onReorder: (items: Todo[]) => void;
+  onToggle: (id: number) => void;
+  onDelete: (id: number) => void;
 }
 
-// --- The "Dumb" Parent Component ---
 export function DragOrderList({ items, onReorder, onToggle, onDelete }: DragOrderListProps) {
-  // NO useState here anymore! It just receives the list and functions.
-
   return (
     <Reorder.Group
       axis="y"
@@ -40,7 +36,6 @@ export function DragOrderList({ items, onReorder, onToggle, onDelete }: DragOrde
   );
 }
 
-// --- The Child Component (mostly unchanged, just uses props) ---
 function DragOrderItem({
   item,
   onToggle,
@@ -125,10 +120,8 @@ function useRaisedShadow(value: MotionValue<number>) {
 
   useMotionValueEvent(value, 'change', (latest) => {
     if (latest !== 0) {
-      // If the item is being dragged, animate in the shadow.
       animate(boxShadow, '5px 5px 15px rgba(0,0,0,0.15)');
     } else {
-      // If the item is dropped, animate the shadow away.
       animate(boxShadow, inactiveShadow);
     }
   });
