@@ -5,10 +5,12 @@ import type { Todo } from '@/lib/todos';
 import { addTodo, deleteTodo, reorderTodos, toggleTodo } from '@/lib/todos';
 import { DragOrderList } from '@/components/ui/TodoDragOrderList';
 import { AddTodoForm } from './AddTodoForm';
-import { get } from 'http';
+import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
 
 export default function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
   const [todos, setTodos] = useState(initialTodos);
+  const incompleteTodos = todos.filter((todo) => !todo.completed);
+  const completedTodos = todos.filter((todo) => todo.completed);
 
   const handleAddTodo = async (content: string) => {
     try {
@@ -19,8 +21,6 @@ export default function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
     }
   };
 
-  // do i want this to remember where the todo was in the order after its untoggled or is moving it to the top fine?
-  // incase of multiple completed todos, should the latest completed one go to the bottom of the completed list or the top?
   const handleToggle = async (idToToggle: number) => {
 
     const todoToToggle = todos.find((todo) => todo.id === idToToggle);
@@ -31,7 +31,7 @@ export default function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
     let list = todos.map((todo) =>
       todo.id === idToToggle ? { ...todo, completed: !todo.completed } : todo,
     );
-   
+
     const completed = list.filter((todo) => todo.completed);
 
     const incomplete = list.filter((todo) => !todo.completed);
@@ -48,7 +48,7 @@ export default function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
     }
 
     setTodos(updated);
-    
+
     try {
       await toggleTodo(idToToggle);
       const idsInOrder = updated.map((todo) => todo.id);
@@ -74,13 +74,35 @@ export default function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
     }
   };
 
-  const handleReorder = async (reorderedTodos: Todo[]) => {
-    setTodos(reorderedTodos);
 
-    const idsInOrder = reorderedTodos.map((todo) => todo.id);
 
+const handleReorder = async (reorderedItems: Todo[]) => {
+
+  const originalTodos = todos;
+  let newFullList: Todo[] = [];
+
+  if (reorderedItems[0].completed) {
+    // We just reordered the COMPLETED list.
+    const incompleteTodos = todos.filter(todo => !todo.completed);
+    newFullList = [...incompleteTodos, ...reorderedItems];
+  } else {
+    // We just reordered the INCOMPLETE list.
+    const completedTodos = todos.filter(todo => todo.completed);
+    newFullList = [...reorderedItems, ...completedTodos];
+  }
+
+  // Optimistically update the UI with the full, correct list.
+  setTodos(newFullList);
+
+  // Now, make the API call with the IDs from the new full list.
+  const idsInOrder = newFullList.map(todo => todo.id);
+  try {
     await reorderTodos(idsInOrder);
-  };
+  } catch (error) {
+    console.error("Failed to save new order:", error);
+    setTodos(originalTodos); // Revert on failure.
+  }
+};
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -88,12 +110,26 @@ export default function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
         <AddTodoForm onAddTodo={handleAddTodo} />
       </div>
 
-      <DragOrderList
-        items={todos}
+      <div className='space-y-4'>
+        <DragOrderList
+        items={incompleteTodos}
         onReorder={handleReorder}
         onToggle={handleToggle}
         onDelete={handleDelete}
       />
+
+        {completedTodos.length > 0 && (
+          <CollapsibleSection title='Completed Todos' defaultOpen={false}>
+            <DragOrderList
+              items={completedTodos}
+              onReorder={handleReorder}
+              onToggle={handleToggle}
+              onDelete={handleDelete}
+            />
+          </CollapsibleSection>
+        )}
+      </div>
     </div>
   );
 }
+
