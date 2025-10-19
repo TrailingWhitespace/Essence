@@ -107,15 +107,16 @@ function DragOrderItem({
 )}
 
           <span className="text-xs text-gray-400">
-            {new Date(item.createdAt).toLocaleString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-              hour: 'numeric',
-              minute: '2-digit',
-              hour12: true, // Use AM/PM
-            })}
-          </span>
+          Created: {new Date(item.createdAt).toLocaleString('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+          })}
+        </span>
         </div>
       </div>
       <button
