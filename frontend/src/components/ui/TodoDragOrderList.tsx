@@ -19,9 +19,12 @@ interface DragOrderListProps {
   onReorder: (items: Todo[]) => void;
   onToggle: (id: number) => void;
   onDelete: (id: number) => void;
+  onStartEdit: (id: number) => void;
+  editingId: number | null;
+  onEditSave: (id: number, newContent: string) => void;
 }
 
-export function DragOrderList({ items, onReorder, onToggle, onDelete }: DragOrderListProps) {
+export function DragOrderList({ items, onReorder, onToggle, onDelete, onStartEdit, editingId, onEditSave }: DragOrderListProps) {
   return (
     <Reorder.Group
       axis="y"
@@ -30,7 +33,7 @@ export function DragOrderList({ items, onReorder, onToggle, onDelete }: DragOrde
       className="space-y-4 w-full max-w-2xl mx-auto"
     >
       {items.map((item) => (
-        <DragOrderItem key={item.id} item={item} onToggle={onToggle} onDelete={onDelete} />
+        <DragOrderItem key={item.id} item={item} onToggle={onToggle} onDelete={onDelete} onStartEdit={onStartEdit} editingId={editingId} onEditSave={onEditSave} />
       ))}
     </Reorder.Group>
   );
@@ -40,10 +43,16 @@ function DragOrderItem({
   item,
   onToggle,
   onDelete,
+  onStartEdit,
+  editingId,
+  onEditSave
 }: {
   item: Todo;
   onToggle: (id: number) => void;
   onDelete: (id: number) => void;
+  onStartEdit: (id: number) => void;
+  onEditSave: (id: number, newContent: string) => void;
+  editingId: number | null;
 }) {
   const y = useMotionValue(0);
   const boxShadow = useRaisedShadow(y);
@@ -68,12 +77,35 @@ function DragOrderItem({
         >
           {item.completed && <Check className="w-5 h-5 text-white" />}
         </button>
-        <div className="flex flex-col">
-          <h2
+        <div className="flex flex-col w-full">
+
+            {editingId === item.id ? (
+
+  <input
+    type="text"
+    defaultValue={item.content}
+    className={`text-lg font-medium rounded bg-transparent border-none outline-none caret-white ${item.completed ? 'line-through text-gray-500' : 'text-gray-100'}`}
+    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        onEditSave(item.id, e.currentTarget.value);
+      }
+      if (e.key === 'Escape') {
+        onEditSave(item.id, item.content);
+      }
+    }}
+    onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+      onEditSave(item.id, e.currentTarget.value);
+    }}
+  />
+) : (
+  <h2
+            onDoubleClick={() => onStartEdit(item.id)}
             className={`text-lg font-semibold ${item.completed ? 'line-through text-gray-500' : 'text-gray-100'}`}
           >
-            {item.content}
-          </h2>
+    {item.content}
+  </h2>
+)}
+
           <span className="text-xs text-gray-400">
             {new Date(item.createdAt).toLocaleString('en-US', {
               year: 'numeric',

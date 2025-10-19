@@ -63,3 +63,13 @@ export async function reorderTodos(idsInOrder: number[]) {
     body: JSON.stringify({ order: idsInOrder }),
   });
 }
+
+export async function updateTodo(id: number, content: string) {
+  const API_URL = getBaseUrl();
+  const res = await fetch(`${API_URL}/api/todos/${id}/update`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content }),
+  });
+  return res.json();
+}

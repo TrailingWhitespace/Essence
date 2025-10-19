@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import type { Todo } from '@/lib/todos';
-import { addTodo, deleteTodo, reorderTodos, toggleTodo } from '@/lib/todos';
+import { addTodo, deleteTodo, reorderTodos, toggleTodo, updateTodo } from '@/lib/todos';
 import { DragOrderList } from '@/components/ui/TodoDragOrderList';
 import { AddTodoForm } from './AddTodoForm';
 import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
@@ -11,6 +11,22 @@ export default function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
   const [todos, setTodos] = useState(initialTodos);
   const incompleteTodos = todos.filter((todo) => !todo.completed);
   const completedTodos = todos.filter((todo) => todo.completed);
+
+  const [editingId, setEditingId] = useState<number | null>(null);
+
+  const handleEdit = async (id: number) => {
+    setEditingId(id);
+  }
+
+  const handleSave = async (id: number, newContent: string) => {
+    setTodos((currentTodos) =>
+      currentTodos.map((todo) =>
+        todo.id === id ? { ...todo, content: newContent } : todo
+      )
+    );
+    updateTodo(id, newContent);
+    setEditingId(null);
+  }
 
   const handleAddTodo = async (content: string) => {
     try {
@@ -116,6 +132,9 @@ const handleReorder = async (reorderedItems: Todo[]) => {
         onReorder={handleReorder}
         onToggle={handleToggle}
         onDelete={handleDelete}
+        onStartEdit={handleEdit}
+        editingId={editingId}
+        onEditSave={handleSave}
       />
 
         {completedTodos.length > 0 && (
@@ -125,6 +144,9 @@ const handleReorder = async (reorderedItems: Todo[]) => {
               onReorder={handleReorder}
               onToggle={handleToggle}
               onDelete={handleDelete}
+              onStartEdit={handleEdit}
+              editingId={editingId}
+              onEditSave={handleSave}
             />
           </CollapsibleSection>
         )}
